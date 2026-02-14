@@ -14,6 +14,7 @@ An efficient and user-friendly bus ticket booking platform built with Laravel 10
   - API Key Protection
   - Bearer Token Authentication
   - Token Expiration & Validation
+  - **Rate Limiting (Throttle)**: Auth protection (10/min) and API global (60/min)
   - Standard JSON Response Format
 
 ## Tech Stack
@@ -190,7 +191,8 @@ app/
 ├── Services/
 │   ├── AuthService.php
 │   ├── BookingService.php
-│   └── ScheduleService.php
+│   ├── ScheduleService.php
+│   └── AdminService.php
 ├── Repositories/
 │   ├── Contracts/
 │   │   ├── UserRepositoryInterface.php
@@ -237,6 +239,16 @@ database/
 - `GET /api/bookings/{id}` - Get booking detail
 - `POST /api/bookings/{id}/cancel` - Cancel booking
 
+### Admin (Role: admin)
+- `GET /api/admin/orders` - View all global orders
+- `POST /api/admin/orders/{id}/confirm` - Confirm a pending order
+- `GET /api/admin/schedules` - List all schedules (admin view)
+- `POST /api/admin/schedules` - Create a new schedule
+- `PUT /api/admin/schedules/{id}` - Update a schedule
+- `DELETE /api/admin/schedules/{id}` - Delete a schedule
+- `GET /api/admin/buses` - List all buses
+- `GET /api/admin/routes` - List all travel routes
+
 ## Validation Rules
 
 All inputs are validated using Laravel Form Requests:
@@ -251,9 +263,10 @@ All inputs are validated using Laravel Form Requests:
 2. **Bearer Token Authentication** - Laravel Sanctum for user authentication
 3. **Token Expiration** - Automatic token expiration after 30 days
 4. **Password Hashing** - Bcrypt hashing for passwords
-5. **Input Validation** - Comprehensive validation for all inputs
+5. **Input Validation** - Comprehensive validation for all inputs (including FormRequests)
 6. **CSRF Protection** - Built-in Laravel CSRF protection
 7. **SQL Injection Prevention** - Eloquent ORM with parameter binding
+8. **Rate Limiting** - Per-IP throttling for authentication and general API
 
 ## Architecture
 
