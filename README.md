@@ -22,6 +22,8 @@ An efficient and user-friendly bus ticket booking platform built with Laravel 10
 - MySQL Database
 - Laravel Sanctum (API Authentication)
 - Eloquent ORM
+- Repository Pattern
+- Service Layer Architecture
 - Request Validation
 
 ## Database Schema
@@ -185,6 +187,22 @@ app/
 │       ├── LoginRequest.php
 │       ├── RegisterRequest.php
 │       └── BookingRequest.php
+├── Services/
+│   ├── AuthService.php
+│   ├── BookingService.php
+│   └── ScheduleService.php
+├── Repositories/
+│   ├── Contracts/
+│   │   ├── UserRepositoryInterface.php
+│   │   ├── OrderRepositoryInterface.php
+│   │   ├── TicketRepositoryInterface.php
+│   │   ├── PaymentRepositoryInterface.php
+│   │   └── ScheduleRepositoryInterface.php
+│   ├── UserRepository.php
+│   ├── OrderRepository.php
+│   ├── TicketRepository.php
+│   ├── PaymentRepository.php
+│   └── ScheduleRepository.php
 ├── Models/
 │   ├── User.php
 │   ├── Bus.php
@@ -194,6 +212,8 @@ app/
 │   ├── Ticket.php
 │   ├── Payment.php
 │   └── ApiKey.php
+├── Providers/
+│   └── RepositoryServiceProvider.php
 database/
 ├── migrations/
 └── seeders/
@@ -234,6 +254,17 @@ All inputs are validated using Laravel Form Requests:
 5. **Input Validation** - Comprehensive validation for all inputs
 6. **CSRF Protection** - Built-in Laravel CSRF protection
 7. **SQL Injection Prevention** - Eloquent ORM with parameter binding
+
+## Architecture
+
+This project follows the **Repository Pattern** with a clean architecture:
+
+- **Controllers**: Handle HTTP requests/responses
+- **Services**: Business logic and transaction management
+- **Repositories**: Data access layer with interfaces
+- **Models**: Eloquent ORM models
+
+See [REPOSITORY_PATTERN.md](REPOSITORY_PATTERN.md) for detailed architecture documentation.
 
 ## Standard Response Format
 

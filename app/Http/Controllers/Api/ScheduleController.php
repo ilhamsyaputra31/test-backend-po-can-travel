@@ -3,34 +3,22 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Schedule;
+use App\Services\ScheduleService;
 use Illuminate\Http\Request;
 
 class ScheduleController extends Controller
 {
+    protected $scheduleService;
+
+    public function __construct(ScheduleService $scheduleService)
+    {
+        $this->scheduleService = $scheduleService;
+    }
+
     public function index(Request $request)
     {
-        $query = Schedule::with(['bus', 'route']);
-
-        if ($request->has('origin')) {
-            $query->whereHas('route', function ($q) use ($request) {
-                $q->where('origin', 'like', '%' . $request->origin . '%');
-            });
-        }
-
-        if ($request->has('destination')) {
-            $query->whereHas('route', function ($q) use ($request) {
-                $q->where('destination', 'like', '%' . $request->destination . '%');
-            });
-        }
-
-        if ($request->has('date')) {
-            $query->whereDate('departure_time', $request->date);
-        }
-
-        $schedules = $query->where('available_seats', '>', 0)
-            ->orderBy('departure_time')
-            ->paginate(10);
+        $filters = $request->only(['origin', 'destination', 'date']);
+        $schedules = $this->scheduleService->searchSchedules($filters);
 
         return response()->json([
             'success' => true,
@@ -40,7 +28,7 @@ class ScheduleController extends Controller
 
     public function show($id)
     {
-        $schedule = Schedule::with(['bus', 'route'])->find($id);
+        $schedule = $this->scheduleService->getScheduleById($id);
 
         if (!$schedule) {
             return response()->json([

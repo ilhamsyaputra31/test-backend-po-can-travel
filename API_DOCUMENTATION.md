@@ -23,6 +23,11 @@ Authorization: Bearer {your_token}
 - Tokens expire after 30 days
 - Expiration time is returned in login/register response
 
+### 4. Rate Limiting (Throttle)
+- **Auth Routes**: 10 requests per minute (e.g., login, register)
+- **General API**: 60 requests per minute
+- Returns `429 Too Many Requests` when limit is reached
+
 ---
 
 ## API Endpoints
@@ -290,6 +295,46 @@ Response (200):
 
 ---
 
+### Admin (Role: admin)
+
+All routes in this section require `X-API-Key`, `Bearer Token`, and the user must have the `admin` role.
+
+#### 1. Get All Orders
+```http
+GET /api/admin/orders
+```
+Returns all bookings from all users.
+
+#### 2. Confirm Order
+```http
+POST /api/admin/orders/{id}/confirm
+```
+Manually confirm a pending booking.
+
+#### 3. Manage Schedules (CRUD)
+- **List All**: `GET /api/admin/schedules`
+- **Create**: `POST /api/admin/schedules`
+- **Update**: `PUT /api/admin/schedules/{id}`
+- **Delete**: `DELETE /api/admin/schedules/{id}`
+
+**Create/Update Body:**
+```json
+{
+  "bus_id": 1,
+  "route_id": 1,
+  "departure_time": "2024-12-01 08:00:00",
+  "arrival_time": "2024-12-01 12:00:00",
+  "price": 85000,
+  "available_seats": 40
+}
+```
+
+#### 4. List Resources
+- **Buses**: `GET /api/admin/buses`
+- **Routes**: `GET /api/admin/routes`
+
+---
+
 ## Standard JSON Response Format
 
 ### Success Response
@@ -342,6 +387,14 @@ Response (200):
 - tickets.*.seat_number: required, string
 - tickets.*.passenger_name: required, string, max 255
 - payment_method: required, in:transfer,ewallet,cash
+
+### Admin Schedule
+- bus_id: required (on create), exists in buses
+- route_id: required (on create), exists in routes
+- departure_time: required (on create), date, after now
+- arrival_time: required (on create), date, after departure_time
+- price: required (on create), numeric, min 0
+- available_seats: required (on create), integer, min 0
 
 ---
 

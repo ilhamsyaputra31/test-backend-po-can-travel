@@ -5,64 +5,53 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
-use App\Models\User;
+use App\Services\AuthService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
+    protected $authService;
+
+    public function __construct(AuthService $authService)
+    {
+        $this->authService = $authService;
+    }
+
     public function register(RegisterRequest $request)
     {
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'phone' => $request->phone,
-            'role' => 'customer',
-        ]);
-
-        $token = $user->createToken('auth_token', ['*'], now()->addDays(30))->plainTextToken;
+        $result = $this->authService->register($request->validated());
 
         return response()->json([
             'success' => true,
             'message' => 'Registration successful',
-            'data' => [
-                'user' => $user,
-                'token' => $token,
-                'token_type' => 'Bearer',
-                'expires_at' => now()->addDays(30)->toDateTimeString(),
-            ]
+            'data' => $result
         ], 201);
     }
 
     public function login(LoginRequest $request)
     {
-        $user = User::where('email', $request->email)->first();
+        $result = $this->authService->login(
+            $request->email,
+            $request->password
+        );
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        if (!$result) {
             return response()->json([
                 'success' => false,
                 'message' => 'Invalid credentials',
             ], 401);
         }
 
-        $token = $user->createToken('auth_token', ['*'], now()->addDays(30))->plainTextToken;
-
         return response()->json([
             'success' => true,
             'message' => 'Login successful',
-            'data' => [
-                'user' => $user,
-                'token' => $token,
-                'token_type' => 'Bearer',
-                'expires_at' => now()->addDays(30)->toDateTimeString(),
-            ]
+            'data' => $result
         ]);
     }
 
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        $this->authService->logout($request->user());
 
         return response()->json([
             'success' => true,
